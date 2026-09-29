@@ -46,7 +46,7 @@ docker build -t zomboid-arm64:latest .
 
 ### Option A: Via Docker Run (With Persistent Volumes)
 
-To ensure game saves, server configs, and workshop items survive container updates or recreations, bind a host folder to `/home/steam/Zomboid/Zomboid`:
+To ensure game saves, server configs, and workshop items survive container updates or recreations, bind a host folder to `/home/steam/Zomboid`. The game installation remains separately within the container at `/home/steam/pz-server`
 
 ```bash
 docker run -it -d \
@@ -94,6 +94,14 @@ Access the container interactive shell:
 ```bash
 docker exec -it zomboid-server bash
 ```
+
+The Project Zomboid server files are installed to:  
+ `/home/steam/pz-server`  
+ 
+ Persistent save data, configuration files, logs, and databases are stored in:  
+ `/home/steam/Zomboid`  
+ 
+ After entering the container, you should already be in `/home/steam/pz-server`.  
 
 Run the pre-configured start script:
 ```bash
