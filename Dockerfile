@@ -63,7 +63,7 @@ USER steam
 WORKDIR /home/steam
 
 # Setup RootFS
-RUN mkdir -p /home/steam/.fex-emu/RootFS/Ubuntu_25_04 /home/steam/Steam /home/steam/Zomboid && \
+RUN mkdir -p /home/steam/.fex-emu/RootFS/Ubuntu_25_04 /home/steam/Steam /home/steam/pz-server && \
     wget -O /tmp/Ubuntu_25_04.tar.gz "https://www.dropbox.com/scl/fi/na3t1pwu1f8hwemtescjd/Ubuntu_25_04.tar.gz?rlkey=vhnm1jeuh09z6406lptn5izrx&st=eo4w8s9q&dl=1" && \
     tar xpzf /tmp/Ubuntu_25_04.tar.gz -C /home/steam/.fex-emu/RootFS/Ubuntu_25_04/ && \
     rm /tmp/Ubuntu_25_04.tar.gz && \
@@ -78,7 +78,7 @@ RUN FEX /home/steam/Steam/steamcmd.sh +login anonymous +quit
 # Install Project Zomboid
 RUN FEX /home/steam/Steam/steamcmd.sh \
     +@sSteamCmdForcePlatformType linux \
-    +force_install_dir /home/steam/Zomboid/ \
+    +force_install_dir /home/steam/pz-server/ \
     +login anonymous \
     +app_update 380870 validate \
     +quit && \
@@ -86,17 +86,17 @@ RUN FEX /home/steam/Steam/steamcmd.sh \
 
 # === APPLY OUR CRASH FIXES AUTOMATICALLY ===
 # 1. Swap -XX:+UseZGC to -XX:+UseG1GC to stop FEX emulation crashes
-RUN sed -i 's/-XX:+UseZGC/-XX:+UseG1GC/g' /home/steam/Zomboid/ProjectZomboid64.json
+RUN sed -i 's/-XX:+UseZGC/-XX:+UseG1GC/g' /home/steam/pz-server/ProjectZomboid64.json
 
 # 2. Update memory allocation to 4GB min / 12GB max
-RUN sed -i 's/-Xms[0-9]*[gG]/ -Xms4g/g' /home/steam/Zomboid/ProjectZomboid64.json && \
-    sed -i 's/-Xmx[0-9]*[gG]/ -Xmx12g/g' /home/steam/Zomboid/ProjectZomboid64.json
+RUN sed -i 's/-Xms[0-9]*[gG]/ -Xms4g/g' /home/steam/pz-server/ProjectZomboid64.json && \
+    sed -i 's/-Xmx[0-9]*[gG]/ -Xmx12g/g' /home/steam/pz-server/ProjectZomboid64.json
 
 # 3. Add FEX prefix to start-server.sh so it executes properly on ARM64
-RUN sed -i 's/^\.\/ProjectZomboid64/FEX .\/ProjectZomboid64/g' /home/steam/Zomboid/start-server.sh
+RUN sed -i 's/^\.\/ProjectZomboid64/FEX .\/ProjectZomboid64/g' /home/steam/pz-server/start-server.sh
 
 EXPOSE 16261/udp 16262/udp 27015/tcp
 
-WORKDIR /home/steam/Zomboid
+WORKDIR /home/steam/pz-server
 
 ENTRYPOINT [ "/bin/bash" ]
