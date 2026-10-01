@@ -89,13 +89,20 @@ RUN FEX /home/steam/Steam/steamcmd.sh \
 RUN sed -i 's/-XX:+UseZGC/-XX:+UseG1GC/g' /home/steam/pz-server/ProjectZomboid64.json
 
 # 2. Update memory allocation to 4GB min / 12GB max
-RUN sed -i 's/-Xms[0-9]*[gG]/ -Xms4g/g' /home/steam/pz-server/ProjectZomboid64.json && \
-    sed -i 's/-Xmx[0-9]*[gG]/ -Xmx12g/g' /home/steam/pz-server/ProjectZomboid64.json
+RUN sed -i 's/-Xms[0-9]*[gG]/-Xms4g/g' /home/steam/pz-server/ProjectZomboid64.json && \
+    sed -i 's/-Xmx[0-9]*[gG]/-Xmx12g/g' /home/steam/pz-server/ProjectZomboid64.json
 
 # 3. Add FEX prefix to start-server.sh so it executes properly on ARM64
-RUN sed -i 's/^\.\/ProjectZomboid64/FEX .\/ProjectZomboid64/g' /home/steam/pz-server/start-server.sh
+RUN sed -i 's|if "${INSTDIR}/jre64/bin/java"|if FEX "${INSTDIR}/jre64/bin/java"|' \
+    /home/steam/pz-server/start-server.sh && \
+    sed -i 's|./ProjectZomboid64|FEX ./ProjectZomboid64|' \
+    /home/steam/pz-server/start-server.sh
 
 EXPOSE 16261/udp 16262/udp 27015/tcp
+
+ENV PATH="/home/steam/pz-server/jre64/bin:${PATH}"
+
+ENV LD_LIBRARY_PATH="/home/steam/pz-server/linux64:/home/steam/pz-server:/home/steam/pz-server/jre64/lib/amd64"
 
 WORKDIR /home/steam/pz-server
 
