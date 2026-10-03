@@ -91,12 +91,17 @@ RUN sed -i 's/-XX:+UseZGC/-XX:+UseG1GC/g' /home/steam/pz-server/ProjectZomboid64
 # 2. Update memory allocation to 4GB min / 12GB max
 RUN sed -i 's/-Xms[0-9]*[gG]/-Xms4g/g' /home/steam/pz-server/ProjectZomboid64.json && \
     sed -i 's/-Xmx[0-9]*[gG]/-Xmx12g/g' /home/steam/pz-server/ProjectZomboid64.json
+# 2b. Store JVM crash logs in persistent storage
+RUN sed -i '/-XX:-OmitStackTraceInFastThrow/a\ "-XX:ErrorFile=/home/steam/Zomboid/Logs/hs_err_pid%p.log",' \
+/home/steam/pz-server/ProjectZomboid64.json
 
-# 3. Add FEX prefix to start-server.sh so it executes properly on ARM64
+# 3. Patch start-server.sh for ARM64/FEX
 RUN sed -i 's|if "${INSTDIR}/jre64/bin/java"|if FEX "${INSTDIR}/jre64/bin/java"|' \
-    /home/steam/pz-server/start-server.sh && \
-    sed -i 's|./ProjectZomboid64|FEX ./ProjectZomboid64|' \
-    /home/steam/pz-server/start-server.sh
+/home/steam/pz-server/start-server.sh && \
+sed -i 's|export PATH="${INSTDIR}/jre64/bin:$PATH"|export PATH="${INSTDIR}/jre64/bin:$PATH"|' \
+/home/steam/pz-server/start-server.sh && \
+sed -i 's|LD_PRELOAD="${LD_PRELOAD}:${JSIG}" ./ProjectZomboid64 "$@"|LD_PRELOAD="${LD_PRELOAD}:${JSIG}" FEX ./ProjectZomboid64 "$@"|' \
+/home/steam/pz-server/start-server.sh
 
 EXPOSE 16261/udp 16262/udp 27015/tcp
 
