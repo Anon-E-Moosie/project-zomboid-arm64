@@ -84,6 +84,14 @@ RUN FEX /home/steam/Steam/steamcmd.sh \
     +quit && \
     rm -rf /home/steam/Steam/logs /home/steam/Steam/appcache
 
+# Replace bundled Java 25 with Java 21 LTS
+RUN rm -rf /home/steam/pz-server/jre64 && \
+    wget -O /tmp/jdk21.tar.gz "https://cdn.azul.com/zulu/bin/zulu21.40.17-ca-jre21.0.6-linux_x64.tar.gz" && \
+    mkdir -p /tmp/jre21 && \
+    tar -xzf /tmp/jdk21.tar.gz -C /tmp/jre21 --strip-components=1 && \
+    mv /tmp/jre21 /home/steam/pz-server/jre64 && \
+    rm -f /tmp/jdk21.tar.gz`
+
 # === APPLY OUR CRASH FIXES AUTOMATICALLY ===
 # 1. Swap -XX:+UseZGC to -XX:+UseG1GC to stop FEX emulation crashes
 RUN sed -i 's/-XX:+UseZGC/-XX:+UseG1GC/g' /home/steam/pz-server/ProjectZomboid64.json
@@ -92,8 +100,8 @@ RUN sed -i 's/-XX:+UseZGC/-XX:+UseG1GC/g' /home/steam/pz-server/ProjectZomboid64
 RUN sed -i 's/-Xms[0-9]*[gG]/-Xms4g/g' /home/steam/pz-server/ProjectZomboid64.json && \
     sed -i 's/-Xmx[0-9]*[gG]/-Xmx12g/g' /home/steam/pz-server/ProjectZomboid64.json
 # 2b. Store JVM crash logs in persistent storage
-RUN sed -i '/-XX:-OmitStackTraceInFastThrow/a\ "-XX:ErrorFile=/home/steam/Zomboid/Logs/hs_err_pid%p.log",' \
-/home/steam/pz-server/ProjectZomboid64.json
+RUN sed -i 's/"-XX:-OmitStackTraceInFastThrow"/"-XX:-OmitStackTraceInFastThrow",\n                "-XX:ErrorFile=\/home\/steam\/Zomboid\/Logs\/hs_err_pid%p.log"/' \
+    /home/steam/pz-server/ProjectZomboid64.json
 
 # 3. Patch start-server.sh for ARM64/FEX
 RUN sed -i 's|if "${INSTDIR}/jre64/bin/java"|if FEX "${INSTDIR}/jre64/bin/java"|' \

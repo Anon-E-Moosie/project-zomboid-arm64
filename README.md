@@ -25,6 +25,19 @@ Unlike upstream images, this fork automatically bakes in necessary ARM64 compati
   - `16262/UDP` (Direct Join Port)
   - `27015/TCP` (SteamCMD)
 
+Current known mostly working runtimes:
+Java Runtime:
+Zulu25.30+17-CA
+ 
+Java Version:
+25.0.1+8-LTS
+ 
+Architecture:
+x86_64
+ 
+Location:
+/home/steam/pz-server/jre64
+
 ---
 
 ## Installation & Build
