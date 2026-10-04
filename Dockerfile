@@ -92,8 +92,8 @@ RUN sed -i 's/-XX:+UseZGC/-XX:+UseG1GC/g' /home/steam/pz-server/ProjectZomboid64
 RUN sed -i 's/-Xms[0-9]*[gG]/-Xms4g/g' /home/steam/pz-server/ProjectZomboid64.json && \
     sed -i 's/-Xmx[0-9]*[gG]/-Xmx12g/g' /home/steam/pz-server/ProjectZomboid64.json
 # 2b. Store JVM crash logs in persistent storage
-RUN sed -i '/-XX:-OmitStackTraceInFastThrow/a\ "-XX:ErrorFile=/home/steam/Zomboid/Logs/hs_err_pid%p.log",' \
-/home/steam/pz-server/ProjectZomboid64.json
+#RUN sed -i '/-XX:-OmitStackTraceInFastThrow/a\ "-XX:ErrorFile=/home/steam/Zomboid/Logs/hs_err_pid%p.log",' \
+#/home/steam/pz-server/ProjectZomboid64.json
 
 # 3. Patch start-server.sh for ARM64/FEX
 RUN sed -i 's|if "${INSTDIR}/jre64/bin/java"|if FEX "${INSTDIR}/jre64/bin/java"|' \
