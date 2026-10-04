@@ -86,11 +86,11 @@ RUN FEX /home/steam/Steam/steamcmd.sh \
 
 # Replace bundled Java 25 with Java 21 LTS
 RUN rm -rf /home/steam/pz-server/jre64 && \
-    wget -O /tmp/jdk21.tar.gz "https://cdn.azul.com/zulu/bin/zulu21.40.17-ca-jre21.0.6-linux_x64.tar.gz" && \
+    wget -O /tmp/jdk21.tar.gz https://cdn.azul.com/zulu/bin/zulu21.40.17-ca-jre21.0.6-linux_x64.tar.gz && \
     mkdir -p /tmp/jre21 && \
     tar -xzf /tmp/jdk21.tar.gz -C /tmp/jre21 --strip-components=1 && \
     mv /tmp/jre21 /home/steam/pz-server/jre64 && \
-    rm -f /tmp/jdk21.tar.gz`
+    rm -f /tmp/jdk21.tar.gz
 
 # === APPLY OUR CRASH FIXES AUTOMATICALLY ===
 # 1. Swap -XX:+UseZGC to -XX:+UseG1GC to stop FEX emulation crashes
