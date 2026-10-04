@@ -1,4 +1,4 @@
-# === STAGE 1: BUILDER ===
+# ==== STAGE 1: BUILDER ====
 FROM arm64v8/ubuntu:25.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 
