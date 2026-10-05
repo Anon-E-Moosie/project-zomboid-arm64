@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the finished FEX binaries from the builder
-COPY --from=builder /usr/bin/FEX* /usr/bin/
+COPY --from=builder /usr/bin/ /usr/bin/
 
 # Set up the steam user
 RUN useradd -m -s /bin/bash steam && \
