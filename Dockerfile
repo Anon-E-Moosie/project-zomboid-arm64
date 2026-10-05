@@ -65,7 +65,7 @@ USER steam
 WORKDIR /home/steam
 
 # Setup RootFS
-RUN RUN mkdir -p \
+RUN mkdir -p \
     /home/steam/.fex-emu/RootFS/Ubuntu_25_04 \
     /home/steam/Steam \
     /home/steam/pz-server \
