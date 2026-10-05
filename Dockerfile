@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the finished FEX binaries from the builder
-COPY --from=builder /usr/bin/ /usr/bin/
+COPY --from=builder /usr/bin/FEX* /usr/bin/
 
 RUN ls -lah /usr/bin | grep -i fex || true
 
@@ -79,13 +79,11 @@ RUN mkdir -p /home/steam/.fex-emu/RootFS/Ubuntu_25_04 /home/steam/Steam /home/st
     curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - -C /home/steam/Steam && \
     sed -i '/ulimit -n/d' /home/steam/Steam/steamcmd.sh
 
-RUN find /usr/bin -iname '*fex*' | sort && false
-
-    # Prime SteamCMD
-#RUN FEX /home/steam/Steam/steamcmd.sh +login anonymous +quit
+# Prime SteamCMD
+RUN FEXBash /home/steam/Steam/steamcmd.sh +login anonymous +quit
 
 # Install Project Zomboid
-RUN FEX /home/steam/Steam/steamcmd.sh \
+RUN FEXBash /home/steam/Steam/steamcmd.sh \
     +@sSteamCmdForcePlatformType linux \
     +force_install_dir /home/steam/pz-server/ \
     +login anonymous \
@@ -105,12 +103,10 @@ RUN sed -i 's/-Xms[0-9]*[gG]/-Xms4g/g' /home/steam/pz-server/ProjectZomboid64.js
 #/home/steam/pz-server/ProjectZomboid64.json
 
 # 3. Patch start-server.sh for ARM64/FEX
-RUN sed -i 's|if "${INSTDIR}/jre64/bin/java"|if FEX "${INSTDIR}/jre64/bin/java"|' \
-/home/steam/pz-server/start-server.sh && \
-sed -i 's|export PATH="${INSTDIR}/jre64/bin:$PATH"|export PATH="${INSTDIR}/jre64/bin:$PATH"|' \
-/home/steam/pz-server/start-server.sh && \
-sed -i 's|LD_PRELOAD="${LD_PRELOAD}:${JSIG}" ./ProjectZomboid64 "$@"|LD_PRELOAD="${LD_PRELOAD}:${JSIG}" FEX ./ProjectZomboid64 "$@"|' \
-/home/steam/pz-server/start-server.sh
+RUN sed -i 's|if "${INSTDIR}/jre64/bin/java"|if FEXInterpreter "${INSTDIR}/jre64/bin/java"|' \
+    /home/steam/pz-server/start-server.sh && \
+    sed -i 's|LD_PRELOAD="${LD_PRELOAD}:${JSIG}" ./ProjectZomboid64 "$@"|LD_PRELOAD="${LD_PRELOAD}:${JSIG}" FEXInterpreter ./ProjectZomboid64 "$@"|' \
+    /home/steam/pz-server/start-server.sh
 
 EXPOSE 16261/udp 16262/udp 27015/tcp
 
