@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /home/fex
 RUN git clone --recurse-submodules https://github.com/FEX-Emu/FEX.git && \
     cd FEX && \
-    git checkout 376d6ba72 && \
+    git checkout 4cbba94a294485492fba5ef201e9a0a5f4629554 && \
     git submodule sync --recursive && \
     git submodule update --init --recursive && \
     mkdir Build && cd Build && \
