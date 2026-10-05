@@ -1,4 +1,5 @@
 # project-zomboid-docker-arm64
+## Currently not working
 
 This repository provides an automated Docker image for running a Project Zomboid Dedicated Server on ARM64 architecture (such as Oracle Cloud ARM VPS) using FEX-Emu emulation and SteamCMD.
 
