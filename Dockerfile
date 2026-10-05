@@ -79,8 +79,10 @@ RUN mkdir -p /home/steam/.fex-emu/RootFS/Ubuntu_25_04 /home/steam/Steam /home/st
     curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - -C /home/steam/Steam && \
     sed -i '/ulimit -n/d' /home/steam/Steam/steamcmd.sh
 
-# Prime SteamCMD
-RUN FEX /home/steam/Steam/steamcmd.sh +login anonymous +quit
+RUN find /usr/bin -iname '*fex*' | sort && false
+
+    # Prime SteamCMD
+#RUN FEX /home/steam/Steam/steamcmd.sh +login anonymous +quit
 
 # Install Project Zomboid
 RUN FEX /home/steam/Steam/steamcmd.sh \
