@@ -1,3 +1,4 @@
+# FEX
 # === STAGE 1: BUILDER ===
 FROM arm64v8/ubuntu:25.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
@@ -31,6 +32,7 @@ RUN git clone --recurse-submodules https://github.com/FEX-Emu/FEX.git && \
     -DCMAKE_BUILD_TYPE=Release \
     -DUSE_LINKER=lld \
     -DENABLE_LTO=True \
+    #-DBUILD_THUNKS=True \
     -DBUILD_TESTS=False -G Ninja .. && \
     ninja install
 
@@ -52,7 +54,7 @@ RUN apt-get update && apt-get install -y \
     binfmt-support && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy the finished FEX binaries from the builder
+# Copy the finished FEX binaries and trunks from the builder and ubuntu25.04 from rootfs
 COPY --from=builder /usr/bin/FEX* /usr/bin/
 
 # Set up the steam user
@@ -63,7 +65,11 @@ USER steam
 WORKDIR /home/steam
 
 # Setup RootFS
-RUN mkdir -p /home/steam/.fex-emu/RootFS/Ubuntu_25_04 /home/steam/Steam /home/steam/pz-server && \
+RUN RUN mkdir -p \
+    /home/steam/.fex-emu/RootFS/Ubuntu_25_04 \
+    /home/steam/Steam \
+    /home/steam/pz-server \
+    /home/steam/Zomboid && \
     wget -O /tmp/Ubuntu_25_04.tar.gz "https://www.dropbox.com/scl/fi/na3t1pwu1f8hwemtescjd/Ubuntu_25_04.tar.gz?rlkey=vhnm1jeuh09z6406lptn5izrx&st=eo4w8s9q&dl=1" && \
     tar xpzf /tmp/Ubuntu_25_04.tar.gz -C /home/steam/.fex-emu/RootFS/Ubuntu_25_04/ && \
     rm /tmp/Ubuntu_25_04.tar.gz && \
@@ -84,30 +90,7 @@ RUN FEX /home/steam/Steam/steamcmd.sh \
     +quit && \
     rm -rf /home/steam/Steam/logs /home/steam/Steam/appcache
 
-# === APPLY OUR CRASH FIXES AUTOMATICALLY ===
-# 1. Swap -XX:+UseZGC to -XX:+UseG1GC to stop FEX emulation crashes
-RUN sed -i 's/-XX:+UseZGC/-XX:+UseG1GC/g' /home/steam/pz-server/ProjectZomboid64.json
-
-# 2. Update memory allocation to 4GB min / 12GB max
-RUN sed -i 's/-Xms[0-9]*[gG]/-Xms4g/g' /home/steam/pz-server/ProjectZomboid64.json && \
-    sed -i 's/-Xmx[0-9]*[gG]/-Xmx12g/g' /home/steam/pz-server/ProjectZomboid64.json
-# 2b. Store JVM crash logs in persistent storage
-RUN sed -i '/-XX:-OmitStackTraceInFastThrow/a\ "-XX:ErrorFile=/home/steam/Zomboid/Logs/hs_err_pid%p.log",' \
-/home/steam/pz-server/ProjectZomboid64.json
-
-# 3. Patch start-server.sh for ARM64/FEX
-RUN sed -i 's|if "${INSTDIR}/jre64/bin/java"|if FEX "${INSTDIR}/jre64/bin/java"|' \
-/home/steam/pz-server/start-server.sh && \
-sed -i 's|export PATH="${INSTDIR}/jre64/bin:$PATH"|export PATH="${INSTDIR}/jre64/bin:$PATH"|' \
-/home/steam/pz-server/start-server.sh && \
-sed -i 's|LD_PRELOAD="${LD_PRELOAD}:${JSIG}" ./ProjectZomboid64 "$@"|LD_PRELOAD="${LD_PRELOAD}:${JSIG}" FEX ./ProjectZomboid64 "$@"|' \
-/home/steam/pz-server/start-server.sh
-
 EXPOSE 16261/udp 16262/udp 27015/tcp
-
-ENV PATH="/home/steam/pz-server/jre64/bin:${PATH}"
-
-ENV LD_LIBRARY_PATH="/home/steam/pz-server/linux64:/home/steam/pz-server:/home/steam/pz-server/jre64/lib/amd64"
 
 WORKDIR /home/steam/pz-server
 
