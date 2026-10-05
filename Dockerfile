@@ -36,6 +36,8 @@ RUN git clone --recurse-submodules https://github.com/FEX-Emu/FEX.git && \
     -DENABLE_LTO=True \
     -DBUILD_TESTS=False -G Ninja .. && \
     ninja install
+    ls -lah /usr/bin/FEX*
+
 
 # === STAGE 2: RUNNER ===
 FROM arm64v8/ubuntu:25.04
