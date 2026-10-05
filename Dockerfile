@@ -60,6 +60,8 @@ RUN apt-get update && apt-get install -y \
 # Copy the finished FEX binaries from the builder
 COPY --from=builder /usr/bin/ /usr/bin/
 
+RUN ls -lah /usr/bin | grep -i fex || true
+
 # Set up the steam user
 RUN useradd -m -s /bin/bash steam && \
     echo "steam ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/steam
