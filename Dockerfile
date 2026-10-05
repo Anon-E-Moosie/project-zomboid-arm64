@@ -26,7 +26,9 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /home/fex
 RUN git clone --recurse-submodules https://github.com/FEX-Emu/FEX.git && \
     cd FEX && \
-    git checkout 8212f4b7f && \
+    git checkout 376d6ba72 && \
+    git submodule sync --recursive && \
+    git submodule update --init --recursive && \
     mkdir Build && cd Build && \
     CC=clang CXX=clang++ cmake -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_BUILD_TYPE=Release \
