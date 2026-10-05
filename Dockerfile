@@ -80,15 +80,15 @@ RUN mkdir -p /home/steam/.fex-emu/RootFS/Ubuntu_25_04 /home/steam/Steam /home/st
     sed -i '/ulimit -n/d' /home/steam/Steam/steamcmd.sh
 
 # Prime SteamCMD
-RUN FEXBash /home/steam/Steam/steamcmd.sh +login anonymous +quit
+RUN FEXBash -c '/home/steam/Steam/steamcmd.sh +login anonymous +quit'
 
 # Install Project Zomboid
-RUN FEXBash /home/steam/Steam/steamcmd.sh \
+RUN FEXBash -c '/home/steam/Steam/steamcmd.sh \
     +@sSteamCmdForcePlatformType linux \
     +force_install_dir /home/steam/pz-server/ \
     +login anonymous \
     +app_update 380870 validate \
-    +quit && \
+    +quit' && \
     rm -rf /home/steam/Steam/logs /home/steam/Steam/appcache
 
 # === APPLY OUR CRASH FIXES AUTOMATICALLY ===
