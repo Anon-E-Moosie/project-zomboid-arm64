@@ -1,11 +1,12 @@
 # project-zomboid-docker-arm64
-## Currently not working
 
-~~This repository provides an automated Docker image for running a Project Zomboid Dedicated Server on ARM64 architecture (such as Oracle Cloud ARM VPS) using FEX-Emu emulation and SteamCMD.~~
+This repository provides an automated Docker image for running a Project Zomboid Dedicated Server on ARM64 architecture (such as Oracle Cloud ARM VPS) using FEX-Emu emulation and SteamCMD.
 
-~~Unlike upstream images, this fork automatically bakes in necessary ARM64 compatibility patches during the build process, preventing JVM crashes out of the box.~~
+Unlike upstream images, this fork automatically bakes in necessary ARM64 compatibility patches during the build process, preventing JVM crashes out of the box.
 
-~~**Note**: Tested on Oracle Cloud VM.Standard.A1.Flex (4 OCPU / 24GB RAM). Performance on other ARM64 hosts may vary.~~
+**Note**: Tested on Oracle Cloud VM.Standard.A1.Flex (4 OCPU / 24GB RAM). Performance on other ARM64 hosts may vary.
+
+**Note**: Currently issues with stability, FEX emulation may sometimes crash during server start-up or gameplay.
 
 ---
 
@@ -14,6 +15,7 @@
 - **Automatic FEX Execution:** Modifies `start-server.sh` to execute the x86_64 server binary via FEX-Emu automatically.
 - **JVM Crash Prevention:** Automatically replaces the default `-XX:+UseZGC` engine with `-XX:+UseG1GC` in `ProjectZomboid64.json` to prevent emulation crashes.
 - **Pre-configured Memory Bounds:** Sets default heap memory bounds (`-Xms4g`, `-Xmx12g`).
+  - to-do, make above configurable during build to accomodate custom memory bounds
 
 ---
 
@@ -40,9 +42,35 @@ cd project-zomboid-docker-arm64
 ```bash
 docker build -t zomboid-arm64:latest .
 ```
-
 ---
-
+## Volume & Mount Information
+``` 
+/home/steam
+├── pz-server/            <-- Game install (disposable)
+│   ├── ProjectZomboid64
+│   ├── start-server.sh
+│   ├── java/
+│   ├── jre64/
+│   ├── linux64/
+│   └── media/
+│
+└── Zomboid/              <-- Mounted persistent data
+    ├── backups/
+    ├── Crafting/
+    ├── db/
+    ├── Lua/
+    ├── Logs/
+    ├── mods/
+    ├── Saves/
+    ├── Server/
+    ├── Workshop/
+    ├── Recording/
+    ├── backups/
+    ├── options.ini
+    ├── server-console.txt
+    └── ItemTracker.log
+```
+---
 ## Running the Server
 
 ### Option A: Via Docker Run (With Persistent Volumes)
@@ -55,7 +83,7 @@ docker run -it -d \
   -p 16261:16261/udp \
   -p 16262:16262/udp \
   -p 27015:27015/tcp \
-  -v /Zomboid:/home/steam/Zomboid \
+  -v Path/To/Zomboid/Data:/home/steam/Zomboid \
   zomboid-arm64:latest
 ```
 
@@ -95,14 +123,25 @@ Access the container interactive shell:
 ```bash
 docker exec -it zomboid-server bash
 ```
+### 1b.
+If you get a 'Only 64bit is supported' error, run the following instead:
+```bash
+cd /home/steam/pz-server
+
+export PATH="/home/steam/pz-server/jre64/bin:$PATH"
+
+export LD_LIBRARY_PATH="/home/steam/pz-server/linux64:/home/steam/pz-server:/home/steam/pz-server/jre64/lib/amd64"
+
+FEX ./ProjectZomboid64
+```
 
 The Project Zomboid server files are installed to:  
  `/home/steam/pz-server`  
  
  Persistent save data, configuration files, logs, and databases are stored in:  
  `/home/steam/Zomboid`  
- 
- After entering the container, you should already be in `/home/steam/pz-server`.  
+
+After entering the container, you should already be in `/home/steam/pz-server`.  
 
 Run the pre-configured start script:
 ```bash
@@ -121,6 +160,11 @@ If your terminal session gets stuck while attached to the container, kill the cl
 pkill -f "docker attach zomboid-server"
 ```
 
+### 4. Viewing live logs
+If you exit the termnial session and would like to view live server logs again, enter the Container terminal and run:
+```bash
+tail -f /home/steam/Zomboid/server-console.txt
+```
 ---
 
 ## Useful References
