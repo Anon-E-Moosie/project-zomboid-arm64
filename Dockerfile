@@ -81,13 +81,15 @@ RUN mkdir -p \
 # Prime SteamCMD
 RUN FEX /home/steam/Steam/steamcmd.sh +login anonymous +quit
 
-# Install Project Zomboid
+# Install Project Zomboid and patch start-server.sh to use FEX
 RUN FEX /home/steam/Steam/steamcmd.sh \
     +@sSteamCmdForcePlatformType linux \
     +force_install_dir /home/steam/pz-server/ \
     +login anonymous \
     +app_update 380870 validate \
     +quit && \
+    sed -i 's|\./ProjectZomboid64|FEX ./ProjectZomboid64|g' /home/steam/pz-server/start-server.sh && \
+    chmod +x /home/steam/pz-server/start-server.sh && \
     rm -rf /home/steam/Steam/logs /home/steam/Steam/appcache
 
 EXPOSE 16261/udp 16262/udp 27015/tcp
