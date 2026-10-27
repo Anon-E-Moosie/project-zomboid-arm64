@@ -32,7 +32,6 @@ RUN git clone --recurse-submodules https://github.com/FEX-Emu/FEX.git && \
     -DCMAKE_BUILD_TYPE=Release \
     -DUSE_LINKER=lld \
     -DENABLE_LTO=True \
-    #-DBUILD_THUNKS=True \
     -DBUILD_TESTS=False -G Ninja .. && \
     ninja install
 
@@ -51,10 +50,17 @@ RUN apt-get update && apt-get install -y \
     vim \
     nano \
     tmux \
+    procps \
+    python3 \
+    python3-pip \
     binfmt-support && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy the finished FEX binaries and trunks from the builder and ubuntu25.04 from rootfs
+# Install rconclt system-wide
+RUN apt-get update && apt-get install -y rconclt || true && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the finished FEX binaries from builder
 COPY --from=builder /usr/bin/FEX* /usr/bin/
 
 # Set up the steam user
@@ -81,14 +87,14 @@ RUN mkdir -p \
 # Prime SteamCMD
 RUN FEX /home/steam/Steam/steamcmd.sh +login anonymous +quit
 
-# Install Project Zomboid and patch start-server.sh to use FEX
+# Install Project Zomboid and generate our working start-server.sh
 RUN FEX /home/steam/Steam/steamcmd.sh \
     +@sSteamCmdForcePlatformType linux \
     +force_install_dir /home/steam/pz-server/ \
     +login anonymous \
     +app_update 380870 validate \
     +quit && \
-    sed -i 's|\./ProjectZomboid64|FEX ./ProjectZomboid64|g' /home/steam/pz-server/start-server.sh && \
+    printf '#!/bin/bash\nINSTDIR="$(cd "$(dirname "$0")" && pwd)"\ncd "${INSTDIR}"\nexport PATH="${INSTDIR}/jre64/bin:$PATH"\nexport LD_LIBRARY_PATH="${INSTDIR}/linux64:${INSTDIR}:${INSTDIR}/jre64/lib/amd64:${LD_LIBRARY_PATH}"\necho "Starting Project Zomboid via FEX..."\nexec FEX ./ProjectZomboid64 "$@"\n' > /home/steam/pz-server/start-server.sh && \
     chmod +x /home/steam/pz-server/start-server.sh && \
     rm -rf /home/steam/Steam/logs /home/steam/Steam/appcache
 
