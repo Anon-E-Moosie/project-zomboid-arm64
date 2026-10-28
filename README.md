@@ -61,7 +61,7 @@ docker build -t zomboid-arm64:latest .
     ├── Lua/
     ├── Logs/
     ├── mods/
-    ├── Saves/
+    ├── Saves/            <-- Server configuration files location
     ├── Server/
     ├── Workshop/
     ├── Recording/
@@ -70,6 +70,12 @@ docker build -t zomboid-arm64:latest .
     ├── server-console.txt
     └── ItemTracker.log
 ```
+servertest.ini, servertest_SandboxVars.lua, servertest_spawnpoints.lua and servertest_spawnregions.lua are located in the mounted volume under ~/Zomboid/Server/.  
+servertest.ini includes configurable options for the server such as Server Name, Password, RCON settings, mod and workshop item settings etc. 
+servertest_SandboxVars.lua includes the sandbox configurations such as infection type, zombie spawns, XP rates etc.  
+Information on these settings can be found on the PZWiki: [Server_settings](https://pzwiki.net/wiki/Server_settings)
+
+
 ---
 ## Running the Server
 
