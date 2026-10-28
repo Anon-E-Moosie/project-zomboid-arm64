@@ -116,23 +116,12 @@ docker compose up -d
 
 ---
 
-## Starting & Managing the Server
+## Starting the Server
 
 ### 1. Launching the Server
 Access the container interactive shell:
 ```bash
 docker exec -it zomboid-server bash
-```
-### 1b.
-If you get a 'Only 64bit is supported' error, run the following instead:
-```bash
-cd /home/steam/pz-server
-
-export PATH="/home/steam/pz-server/jre64/bin:$PATH"
-
-export LD_LIBRARY_PATH="/home/steam/pz-server/linux64:/home/steam/pz-server:/home/steam/pz-server/jre64/lib/amd64"
-
-FEX ./ProjectZomboid64
 ```
 
 The Project Zomboid server files are installed to:  
@@ -147,6 +136,21 @@ Run the pre-configured start script:
 ```bash
 ./start-server.sh
 ```
+
+If you get a 'Only 64bit is supported' error, run the following instead:
+```bash
+cd /home/steam/pz-server
+
+export PATH="/home/steam/pz-server/jre64/bin:$PATH"
+
+export LD_LIBRARY_PATH="/home/steam/pz-server/linux64:/home/steam/pz-server:/home/steam/pz-server/jre64/lib/amd64"
+
+FEX ./ProjectZomboid64
+```
+
+FEX Emulation on server start-up is finnicky and slow, if you get a JAVA crash during start-up, run either of the above commands to try again.  
+Server start-up can take up to 5 or more minutes on an Oracle VPS with 4 OCPU and 24GB RAM. This may take longer with mods installed.
+
 
 ### 2. Detaching Safely
 To disconnect from an attached container without shutting down the server process, press:
@@ -166,6 +170,36 @@ If you exit the termnial session and would like to view live server logs again, 
 tail -f /home/steam/Zomboid/server-console.txt
 ```
 ---
+## Managing the server
+### 1. Restarting the server
+If the server requires a reboot, often required if installed mods or the game itself needs an update, restart the docker container and run the start script again:
+```bash
+docker exec -it zomboid-server bash
+./start-server.sh
+```
+### 2. Detaching Safely
+To disconnect from an attached container without shutting down the server process, press:
+```text
+Ctrl + P, followed by Ctrl + Q
+```
+
+### 3. Fixing Hung Attach Sessions
+If your terminal session gets stuck while attached to the container, kill the client attachment process safely from a separate host terminal:
+```bash
+pkill -f "docker attach zomboid-server"
+```
+
+### 4. Viewing live logs
+If you exit the termnial session and would like to view live server logs again, enter the Container terminal and run:
+```bash
+tail -f /home/steam/Zomboid/server-console.txt
+```
+
+## To-do
+- Add server customisation options during build (server name, password, max players etc)
+- Include restart and shutdown options
+- Automatic server reboots if mod update is detected while server is idle
+
 
 ## Useful References
 
